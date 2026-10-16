@@ -78,6 +78,13 @@ What the AI did wrong or assumed: Several modules eagerly initialized the file-b
 How I noticed: The affected suites passed when their modules lazily loaded the default database only for calls without an injected database.
 Fix: Made webhook, login rate-limit, assistant, and profile-route database fallbacks lazy; injected-database flows no longer open `.data/pglite` at import time.
 
+### 2026-10-16 — Recover the local demo from an aborted PGlite store
+Tool: Codex
+What I asked for: Fix the reported `RuntimeError: Aborted()` at `client.waitReady` when starting Carafe locally.
+What the AI did wrong or assumed: I previously left the local demo using its existing file-backed PGlite store without checking whether that store could be reopened after the server stopped.
+How I noticed: Opening `.data/pglite` directly reproduced the WASM abort after the dev server was stopped, while a fresh PGlite directory initialized successfully.
+Fix: Preserved the broken store as a local backup, recreated the schema and seeded the golden dataset, and documented the recovery steps in the README.
+
 - M2 local event sender initially used a named ESM import for `loadEnvConfig` from `@next/env`; Node resolved its CommonJS entry and the smoke command failed before sending. Switched to Node's `createRequire` to call the package's CommonJS export, then reran the sender against the local app.
 - M3 profile integration coverage initially assumed the first seeded app account also had web activity and an app event. The seed only guarantees an aggregate overlap, not which account appears first or that CSV users have webhook events, so the test now selects from the actual overlap and adds a test app event for that reader.
 - The M2 CLI smoke test created one `u_demo_test` row in the persistent local database, making a later seed summary show 931 app users. Removed the test event, device link, and profile created by that smoke test; reran `npm run seed` and restored the expected 930 app users. Keep future webhook smoke tests in isolated PGlite databases or clean their named local fixture afterward.

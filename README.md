@@ -11,6 +11,8 @@ A mini customer data platform for The Pour Over. Carafe will bring newsletter, w
 
 When `DATABASE_URL` is unset, local development uses PGlite in `.data/pglite`. Production uses Neon Postgres. A local production build can set a temporary syntactically valid Neon URL to prevent Next's parallel build workers from opening the same PGlite directory; build workers do not connect to it. For example, in PowerShell: `$env:DATABASE_URL='postgres://build:build@127.0.0.1:5432/build'; npm run build`.
 
+If local startup fails at `client.waitReady` with `RuntimeError: Aborted()`, stop the dev server and preserve the broken local database before rebuilding it. In PowerShell, run `Move-Item .data/pglite ".data/pglite-corrupt-backup-$(Get-Date -Format yyyyMMdd-HHmmss)"`, then `npm run db:push`, `npm run seed`, and `npm run dev`. This creates a fresh seeded local demo database; the renamed directory keeps the previous local database available for recovery.
+
 ## Architecture
 
 Next.js App Router and strict TypeScript serve the UI and API routes. Drizzle ORM maps the application schema to Postgres, with PGlite locally and Neon as the free-tier production target. The seed pipeline normalizes and deduplicates source CSVs, quarantines invalid subscriber rows, and stitches web and app identities. Shared subscriber facts compute cold status and engagement for lookup, live activity, segments, and the plan-only assistant.
