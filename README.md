@@ -43,6 +43,10 @@ curl -i http://localhost:3000/webhooks/app \
 
 Repeat the same command with the same body and timestamp while the signature is still fresh to get `200 {"status":"duplicate"}`. The authenticated `POST /api/demo/send-test-event` helper signs a generated event server-side and calls the same handler.
 
+## Lookup and live activity (M3)
+
+Open `/app/lookup` to search by email fragment or exact `v_`, `u_`, and `d_` identifiers. Search terms go in a JSON request body. Email addresses are masked in results by default; the visible toggle reveals them for the current view. Subscriber profiles use the subscriber UUID, while app-only and visitor-only profile URLs use a keyed HMAC token derived with `SESSION_SECRET` so the original user/device/visitor identifier stays out of browser history. Profiles combine newsletter facts, site visits, app accounts, an activity timeline, identity explanations, and the pre-signup page path. `/app/live` polls every two seconds and links new events to their resolved profile. The demo event action uses the signed webhook handler.
+
 ## Seeded data
 
 `npm run seed` loads 2,995 subscriber rows, 10,000 web events, and 930 app users. It merges 85 duplicate rows into 2,900 subscribers and quarantines 10 invalid/blank subscriber rows. The checked facts include 2,610 active readers, 464 cold readers, 8,441 linked web rows, 900 matched app users, and 139 active readers scoring at least 70. `npm test` includes the complete set of applicable PRD golden-number assertions and a repeat-seed check.
