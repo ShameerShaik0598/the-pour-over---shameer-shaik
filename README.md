@@ -13,7 +13,7 @@ When `DATABASE_URL` is unset, local development uses PGlite in `.data/pglite`. P
 
 ## Architecture
 
-Next.js App Router and strict TypeScript serve the UI and API routes. Drizzle ORM maps the application schema to Postgres. PGlite provides a local embedded database, while Neon is the free-tier production target. The seed pipeline normalizes and deduplicates the source CSVs, quarantines invalid subscriber rows, and stitches web and app identities. A shared subscriber facts read model computes cold status and engagement; later milestones add lookup, segments, and assistant views.
+Next.js App Router and strict TypeScript serve the UI and API routes. Drizzle ORM maps the application schema to Postgres. PGlite provides a local embedded database, while Neon is the free-tier production target. The seed pipeline normalizes and deduplicates the source CSVs, quarantines invalid subscriber rows, and stitches web and app identities. A shared subscriber facts read model computes cold status and engagement; lookup, live activity, segments, and the assistant are available.
 
 ## Data rules
 
@@ -51,6 +51,12 @@ Open `/app/lookup` to search by email fragment or exact `v_`, `u_`, and `d_` ide
 
 Open `/app/segments` to combine source, status, date, cold bucket, app, site activity, and engagement filters. The strict filter schema rejects unknown fields, and the compiler evaluates only allowlisted fields on the shared subscriber facts read model. Preview is debounced and paginated at 50 rows. Saved segments are shared with the team; viewers may save up to 10 each. CSV export includes the email Growth needs and prefixes spreadsheet formula cells with a single quote. A viewer export is capped at 5,000 rows.
 
+## Assistant (M5)
+
+Open `/app/assistant` for the three suggested audience questions and the plan-only assistant. Every provider payload is created by `buildModelRequest()` in `src/lib/ai/request.ts` from the redacted question, a static system prompt, and the static JSON schema. No database values or query results enter this function. The output is validated as a plan and executed locally; the rules planner gives the same suggested answers when no provider key is configured. The audit stores only the redacted prompt and validated plan. The UI's “What the model saw” drawer displays those exact values.
+
+To enable Gemini, set `GEMINI_API_KEY` and choose `GEMINI_MODEL` from Google's currently available free-tier models that support structured output; the code does not pin a model. Without these values, the local rules fallback remains available. Redaction covers email-like strings, phone-like strings, and documented identifier patterns. TODO(stub): typed personal names cannot be reliably identified because the source data has no name field.
+
 ## Seeded data
 
 `npm run seed` loads 2,995 subscriber rows, 10,000 web events, and 930 app users. It merges 85 duplicate rows into 2,900 subscribers and quarantines 10 invalid/blank subscriber rows. The checked facts include 2,610 active readers, 464 cold readers, 8,441 linked web rows, 900 matched app users, and 139 active readers scoring at least 70. `npm test` includes the complete set of applicable PRD golden-number assertions and a repeat-seed check.
@@ -71,7 +77,6 @@ Open `/app/segments` to combine source, status, date, cold bucket, app, site act
 
 ## Known limitations
 
-- TODO(stub): overview figures remain placeholders until the M6 data-backed dashboard.
 - TODO(stub): when Google Fonts cannot be reached during the build, next/font uses system fallbacks instead of Fraunces, Instrument Sans, and JetBrains Mono.
-- The name field is not present in the data; future assistant redaction cannot reliably detect a typed personal name.
+- TODO(stub): assistant redaction cannot reliably detect typed personal names because the data has no name field.
 - Visitor stitching can misattribute visits on shared browsers; device stitching can misattribute anonymous activity after logout on a shared device.
