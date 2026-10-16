@@ -9,11 +9,11 @@ A mini customer data platform for The Pour Over. Carafe will bring newsletter, w
 3. Copy `.env.example` to `.env.local`. Set a random `SESSION_SECRET` with at least 32 characters, `ADMIN_USERNAME`, and an scrypt password hash from `npm run hash-password -- "your-password"`. Escape each `$` in the hash as `\$` so dotenv preserves the scrypt separators. Set `DEMO_USERNAME` and `DEMO_PASSWORD` for the recruiter account.
 4. Run `npm run db:push`, then `npm run seed`, then `npm run dev` and open [http://localhost:3000](http://localhost:3000).
 
-When `DATABASE_URL` is unset, local development uses PGlite in `.data/pglite`. Production uses Neon Postgres.
+When `DATABASE_URL` is unset, local development uses PGlite in `.data/pglite`. Production uses Neon Postgres. A local production build can set a temporary syntactically valid Neon URL to prevent Next's parallel build workers from opening the same PGlite directory; build workers do not connect to it. For example, in PowerShell: `$env:DATABASE_URL='postgres://build:build@127.0.0.1:5432/build'; npm run build`.
 
 ## Architecture
 
-Next.js App Router and strict TypeScript serve the UI and API routes. Drizzle ORM maps the application schema to Postgres. PGlite provides a local embedded database, while Neon is the free-tier production target. The seed pipeline normalizes and deduplicates the source CSVs, quarantines invalid subscriber rows, and stitches web and app identities. A shared subscriber facts read model computes cold status and engagement; lookup, live activity, segments, and the assistant are available.
+Next.js App Router and strict TypeScript serve the UI and API routes. Drizzle ORM maps the application schema to Postgres, with PGlite locally and Neon as the free-tier production target. The seed pipeline normalizes and deduplicates source CSVs, quarantines invalid subscriber rows, and stitches web and app identities. Shared subscriber facts compute cold status and engagement for lookup, live activity, segments, and the plan-only assistant.
 
 ## Data rules
 
@@ -70,13 +70,21 @@ To enable Gemini, set `GEMINI_API_KEY` and choose `GEMINI_MODEL` from Google's c
 | `user_id` | `app_users`, `app_events`, `device_links` | Admin and viewer | URLs/query strings, logs, error messages, analytics, or model requests/responses |
 | `device_id` | `device_links`, `app_events` | Admin and viewer | URLs/query strings, logs, error messages, analytics, or model requests/responses |
 
+## Security and privacy operations
+
+API mutations enforce same-origin checks and authenticated sessions. Admin-only `DELETE /api/profiles/{subscriber|app|visitor}/{id}` erases a profile and linked web/app activity, identifiers, delivery references, identity-conflict rows, and matching quarantined email values. App-only and visitor-only route IDs are keyed opaque tokens. The application sets CSP, HSTS, nosniff, same-origin referrer, and anti-framing headers; login, webhook, and assistant have rate limits. Web and app event retention intent is 180 days, but automatic expiry is not implemented. See [docs/DEPLOY.md](docs/DEPLOY.md) for Vercel and Neon setup.
+
 ## Assumptions
 
 - The product clock is fixed to September 28, 2026, per the assessment.
 - Web timestamps will be interpreted as UTC.
+- The editable cold-list cost is an estimate supplied by the operator, not billing data.
+- Event retention is intended to be 180 days; enforcement requires a future scheduled job.
 
 ## Known limitations
 
-- TODO(stub): when Google Fonts cannot be reached during the build, next/font uses system fallbacks instead of Fraunces, Instrument Sans, and JetBrains Mono.
 - TODO(stub): assistant redaction cannot reliably detect typed personal names because the data has no name field.
 - Visitor stitching can misattribute visits on shared browsers; device stitching can misattribute anonymous activity after logout on a shared device.
+- Rate-limit buckets use database-backed fixed windows; deployment-level IP forwarding must be configured so forwarded IP headers cannot be spoofed by untrusted clients.
+- Profile erasure is a sequence of database statements rather than a transaction because the Neon HTTP driver does not support interactive transactions; an interrupted request may need the erasure retried.
+- `npm audit` on 2026-10-16 reported 9 development-tool advisories (4 moderate, 5 high) through Drizzle Kit's esbuild-kit loader and ESLint's braces/fast-glob chain. The registry offered no non-major remediation; its suggested ESLint fix downgrades `eslint-config-next` to 14.2.35, so the app's 16.4.2 toolchain was not downgraded.

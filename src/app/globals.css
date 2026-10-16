@@ -20,9 +20,9 @@
   --color-ink-muted: var(--ink-muted);
   --color-line: var(--line);
   --color-accent: var(--accent);
-  --font-display: var(--font-fraunces);
-  --font-ui: var(--font-instrument);
-  --font-mono: var(--font-jetbrains);
+  --font-display: "Fraunces", Georgia, serif;
+  --font-ui: "Instrument Sans", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", Consolas, monospace;
 }
 
 * { box-sizing: border-box; }

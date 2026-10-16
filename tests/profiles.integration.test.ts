@@ -5,9 +5,10 @@ import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import * as schema from "@/lib/db/schema";
 import type { AppDatabase } from "@/lib/db";
-import { appEvents, appUsers, deviceLinks, visitors } from "@/lib/db/schema";
+import { appEvents, appUsers, deviceLinks, quarantine, visitors, webhookDeliveries } from "@/lib/db/schema";
 import { seedData } from "@/lib/ingest/seed";
-import { getProfile, recentEvents, searchProfiles } from "@/lib/profile";
+import { getProfile, opaqueAppProfileId, recentEvents, searchProfiles } from "@/lib/profile";
+import { eraseProfile } from "@/lib/erase-profile";
 import { processAppWebhook } from "@/lib/webhook";
 
 let client: PGlite;
@@ -85,5 +86,22 @@ describe("profile lookup and live activity", () => {
     const feed = await recentEvents(database, null);
     expect(feed.events.some((entry) => entry.event === "app_open" && entry.profile?.id === hit.id)).toBe(true);
     expect((await database.select().from(appEvents)).some((entry) => entry.eventId === "evt_profile_live")).toBe(true);
+  });
+
+  it("erases an app-only profile and linked activity, devices, and quarantine email", async () => {
+    await database.insert(appUsers).values({ userId: "u_erase_fixture", email: "erase.fixture@example.com", subscriberId: null,
+      createdAt: new Date("2026-09-01T00:00:00Z"), origin: "webhook" });
+    await database.insert(deviceLinks).values({ deviceId: "d_erase_fixture", userId: "u_erase_fixture", firstSeenAt: new Date("2026-09-01T00:00:00Z") });
+    await database.insert(appEvents).values({ eventId: "evt_erase_fixture", event: "app_open", userId: null, deviceId: "d_erase_fixture",
+      occurredAt: new Date("2026-09-02T00:00:00Z"), properties: {} });
+    await database.insert(webhookDeliveries).values({ eventId: "evt_erase_fixture", outcome: "accepted" });
+    await database.insert(quarantine).values({ sourceFile: "test.csv", rowNumber: 9001, raw: { email: "erase.fixture@example.com" }, reason: "test" });
+    const opaqueId = opaqueAppProfileId("u_erase_fixture");
+    expect(await eraseProfile(database, "app", opaqueId)).toBe(true);
+    expect((await database.select().from(appUsers)).some((row) => row.userId === "u_erase_fixture")).toBe(false);
+    expect((await database.select().from(deviceLinks)).some((row) => row.deviceId === "d_erase_fixture")).toBe(false);
+    expect((await database.select().from(appEvents)).some((row) => row.eventId === "evt_erase_fixture")).toBe(false);
+    expect((await database.select().from(webhookDeliveries)).some((row) => row.eventId === "evt_erase_fixture")).toBe(false);
+    expect((await database.select().from(quarantine)).some((row) => JSON.stringify(row.raw).includes("erase.fixture@example.com"))).toBe(false);
   });
 });
