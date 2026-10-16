@@ -7,6 +7,7 @@ import { PGlite } from "@electric-sql/pglite";
 import * as schema from "@/lib/db/schema";
 
 type Database = PgliteDatabase<typeof schema>;
+let closeClient: () => Promise<void> = async () => {};
 
 async function createDatabase(): Promise<Database> {
   if (process.env.DATABASE_URL) {
@@ -18,7 +19,10 @@ async function createDatabase(): Promise<Database> {
   await mkdir(dataDir, { recursive: true });
   const client = new PGlite(path.join(dataDir, "pglite"));
   await client.waitReady;
+  closeClient = () => client.close();
   return drizzlePglite(client, { schema });
 }
 
 export const db = await createDatabase();
+export type AppDatabase = typeof db;
+export async function closeDatabase() { await closeClient(); }

@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
+import { TODAY, TODAY_LABEL } from "@/lib/clock";
 
 export function Masthead({ title = "Carafe", eyebrow = "THE POUR OVER · READER EDITION" }: { title?: string; eyebrow?: string }) {
-  return <header className="masthead"><div className="page-shell flex items-end justify-between gap-4"><div><p className="section-label">{eyebrow}</p><h1 className="font-display text-3xl sm:text-4xl">{title}</h1></div><time className="section-label hidden sm:block" dateTime="2026-09-28">Monday, September 28, 2026</time></div></header>;
+  return <header className="masthead"><div className="page-shell flex items-end justify-between gap-4"><div><p className="section-label">{eyebrow}</p><h1 className="font-display text-3xl sm:text-4xl">{title}</h1></div><time className="section-label hidden sm:block" dateTime={TODAY}>{TODAY_LABEL}</time></div></header>;
 }
 
 export function StatFigure({ value, label }: { value: string | number; label: string }) {

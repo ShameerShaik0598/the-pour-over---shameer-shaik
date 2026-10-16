@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { TODAY, daysBetween } from "@/lib/clock";
+import { TODAY, TODAY_LABEL, daysBetween, last30DaysStartDate, previousMonthRange } from "@/lib/clock";
 import { normalizeEmail } from "@/lib/email";
 import { normalizeSource } from "@/lib/sources";
 
@@ -29,6 +29,9 @@ describe("source mapping", () => {
 describe("product clock", () => {
   it("uses the assessment date", () => {
     expect(TODAY).toBe("2026-09-28");
+    expect(TODAY_LABEL).toBe("Monday, September 28, 2026");
     expect(daysBetween("2026-08-29")).toBe(30);
+    expect(last30DaysStartDate()).toBe("2026-08-29");
+    expect(previousMonthRange()).toEqual(["2026-08-01", "2026-08-31"]);
   });
 });

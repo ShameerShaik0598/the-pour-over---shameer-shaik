@@ -1,0 +1,2 @@
+CREATE UNIQUE INDEX "identity_conflicts_kind_refs_unique_idx" ON "identity_conflicts" USING btree ("kind","ref_a","ref_b");--> statement-breakpoint
+CREATE UNIQUE INDEX "quarantine_source_row_unique_idx" ON "quarantine" USING btree ("source_file","row_number");

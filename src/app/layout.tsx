@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
+// TODO(stub): next/font falls back to system fonts when the build host cannot reach Google Fonts.
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces" });
 const instrument = Instrument_Sans({ subsets: ["latin"], variable: "--font-instrument" });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" });

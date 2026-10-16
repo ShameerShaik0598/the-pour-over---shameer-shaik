@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Masthead, StatFigure } from "@/components/ui";
 import { readSession, sessionCookieName } from "@/lib/auth";
 
+// TODO(stub): Replace overview placeholders with the data-backed M6 dashboard.
 export default async function OverviewPage() {
   const session = await readSession((await cookies()).get(sessionCookieName)?.value);
   if (!session) redirect("/login");
