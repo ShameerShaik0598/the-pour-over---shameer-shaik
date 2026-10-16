@@ -9,6 +9,7 @@ import { appEvents, appUsers, deviceLinks, quarantine, visitors, webhookDeliveri
 import { seedData } from "@/lib/ingest/seed";
 import { getProfile, opaqueAppProfileId, recentEvents, searchProfiles } from "@/lib/profile";
 import { eraseProfile } from "@/lib/erase-profile";
+import { getOverviewData } from "@/lib/dashboard";
 import { processAppWebhook } from "@/lib/webhook";
 
 let client: PGlite;
@@ -86,6 +87,14 @@ describe("profile lookup and live activity", () => {
     const feed = await recentEvents(database, null);
     expect(feed.events.some((entry) => entry.event === "app_open" && entry.profile?.id === hit.id)).toBe(true);
     expect((await database.select().from(appEvents)).some((entry) => entry.eventId === "evt_profile_live")).toBe(true);
+    expect((await getOverviewData(database)).live.events.some((entry) => entry.event === "app_open")).toBe(true);
+  });
+
+  it("loads overview and quality card numbers from the seeded database", async () => {
+    const dashboard = await getOverviewData(database);
+    expect(dashboard.stats).toMatchObject({ subscriberRows: 2900, active: 2610, cold: { total: 464 }, web: { rows: 10000, rowsWithEmail: 1400, linkedRows: 8441, unlinkedRows: 1559, anonymousVisitors: 628 } });
+    expect(dashboard.dataQuality).toMatchObject({ duplicatesMerged: 85, unlinkedVisitors: 628, identityConflicts: 0 });
+    expect(dashboard.dataQuality.quarantined).toHaveLength(10);
   });
 
   it("erases an app-only profile and linked activity, devices, and quarantine email", async () => {

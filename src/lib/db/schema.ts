@@ -16,7 +16,7 @@ export const visitors = pgTable("visitors", {
 });
 export const webEvents = pgTable("web_events", {
   id: bigint("id", { mode: "number" }).generatedAlwaysAsIdentity().primaryKey(), visitorId: text("visitor_id").notNull().references(() => visitors.visitorId),
-  page: text("page").notNull(), occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(), utmSource: text("utm_source"), rowKey: text("row_key").notNull().unique(),
+  page: text("page").notNull(), occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(), utmSource: text("utm_source"), emailCaptured: boolean("email_captured").notNull().default(false), rowKey: text("row_key").notNull().unique(),
 }, (t) => [index("web_events_visitor_time_idx").on(t.visitorId, t.occurredAt)]);
 export const appUsers = pgTable("app_users", {
   userId: text("user_id").primaryKey(), email: text("email"), subscriberId: uuid("subscriber_id").references(() => subscribers.id),

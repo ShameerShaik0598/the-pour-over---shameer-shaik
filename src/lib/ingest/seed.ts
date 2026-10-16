@@ -157,7 +157,7 @@ export async function seedData(database: AppDatabase, rawDir = path.join(process
   for (let offset = 0; offset < visitorConflicts.length; offset += 500) {
     await database.insert(identityConflicts).values(visitorConflicts.slice(offset, offset + 500)).onConflictDoNothing();
   }
-  const eventValues = webResult.parsed.map((row) => ({ visitorId: row.visitorId, page: row.page, occurredAt: row.occurredAt, utmSource: row.utmSource, rowKey: `${row.visitorId}|${row.page}|${row.occurredAt.toISOString()}` }));
+  const eventValues = webResult.parsed.map((row) => ({ visitorId: row.visitorId, page: row.page, occurredAt: row.occurredAt, utmSource: row.utmSource, emailCaptured: row.email !== null, rowKey: `${row.visitorId}|${row.page}|${row.occurredAt.toISOString()}` }));
   for (let offset = 0; offset < eventValues.length; offset += 400) {
     await database.insert(webEvents).values(eventValues.slice(offset, offset + 400)).onConflictDoNothing({ target: webEvents.rowKey });
   }

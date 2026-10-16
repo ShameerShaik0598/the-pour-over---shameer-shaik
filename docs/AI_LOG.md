@@ -43,6 +43,20 @@ What the AI did wrong or assumed: The layout used `next/font/google`, which made
 How I noticed: `npm run build` failed while fetching Fraunces, Instrument Sans, and JetBrains Mono in this network-restricted environment.
 Fix: Removed remote build-time font fetches and use the documented local system font stacks; the editorial font family names remain first in each CSS stack when installed locally.
 
+### 2026-10-16 — Keep font stack variables valid after removing remote font loader
+Tool: Codex
+What I asked for: Remove network-dependent `next/font/google` imports so builds work offline.
+What the AI did wrong or assumed: It removed the generated font variables but left CSS declarations referencing those undefined variables.
+How I noticed: Reviewed the global styles after the offline build fix.
+Fix: Pointed body and stat typography at the defined `--font-ui` and `--font-display` fallback stacks.
+
+### 2026-10-16 — Store the email-capture fact per web event
+Tool: Codex
+What I asked for: Build a query-backed overview card comparing email-captured visits with stitched visits.
+What the AI did wrong or assumed: It initially inferred row-level email capture from a visitor's saved email, which counted all 8,441 events for linked visitors instead of the 1,400 CSV rows that captured an email.
+How I noticed: The new dashboard integration assertion showed 8,441 where the PRD requires 1,400.
+Fix: Added a non-PII `email_captured` flag to each web event, populated it during CSV ingestion, and query that flag for the card; all PRD card counts now pass from seeded data.
+
 - M2 local event sender initially used a named ESM import for `loadEnvConfig` from `@next/env`; Node resolved its CommonJS entry and the smoke command failed before sending. Switched to Node's `createRequire` to call the package's CommonJS export, then reran the sender against the local app.
 - M3 profile integration coverage initially assumed the first seeded app account also had web activity and an app event. The seed only guarantees an aggregate overlap, not which account appears first or that CSV users have webhook events, so the test now selects from the actual overlap and adds a test app event for that reader.
 - The M2 CLI smoke test created one `u_demo_test` row in the persistent local database, making a later seed summary show 931 app users. Removed the test event, device link, and profile created by that smoke test; reran `npm run seed` and restored the expected 930 app users. Keep future webhook smoke tests in isolated PGlite databases or clean their named local fixture afterward.

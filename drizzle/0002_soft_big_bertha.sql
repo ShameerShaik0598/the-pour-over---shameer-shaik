@@ -1,0 +1,1 @@
+ALTER TABLE "web_events" ADD COLUMN "email_captured" boolean DEFAULT false NOT NULL;

@@ -15,6 +15,13 @@
       "when": 1792121369211,
       "tag": "0001_ingest_idempotency_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792126745788,
+      "tag": "0002_soft_big_bertha",
+      "breakpoints": true
     }
   ]
 }
