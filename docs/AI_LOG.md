@@ -32,3 +32,6 @@ What I asked for: Verify both the recruiter and owner login paths locally.
 What the AI did wrong or assumed: It copied the `scrypt$...$...` value into `.env.local` without escaping its dollar signs; Next's dotenv expansion removed the separators and the admin login returned 401.
 How I noticed: The same password verified against the raw hash but failed after loading it through Next's environment parser.
 Fix: Escaped each `$` in `.env.local` and documented that requirement in `.env.example` and the README; both login routes now return 200.
+# AI work log
+
+- M2 local event sender initially used a named ESM import for `loadEnvConfig` from `@next/env`; Node resolved its CommonJS entry and the smoke command failed before sending. Switched to Node's `createRequire` to call the package's CommonJS export, then reran the sender against the local app.

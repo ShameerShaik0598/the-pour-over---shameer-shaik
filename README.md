@@ -24,6 +24,25 @@ Next.js App Router and strict TypeScript serve the UI and API routes. Drizzle OR
 - App accounts link by normalized email. Accounts without a subscriber match remain app-only profiles. Device links use the earliest event time; anonymous device events resolve through that link.
 - Cold means no open for 31 days, or no open since signup for 31 days, among active subscribers. New never-opened subscribers are not cold. The engagement score uses open recency, recent web visits, app account presence, and recent app events.
 
+## App webhook (M2)
+
+`POST /webhooks/app` accepts signed events using `X-TPO-Timestamp` and `X-TPO-Signature: sha256=<hex>`. The signature is HMAC-SHA256 over the timestamp, a period, and the exact raw request body. Requests are limited to 16 KB and a 300/minute per-IP bucket; timestamps outside the 5-minute replay window are rejected. `WEBHOOK_SECRET_PREVIOUS` allows rotation. Event IDs are idempotent, device links retain the earliest event time, and activity resolves anonymous events through the device link at read time. Free-form properties are scrubbed for email and phone-like values before storage.
+
+For a signed local smoke event, set `WEBHOOK_SECRET` in `.env.local` and run `npm run send-event`. A matching shell example (requires `openssl` and `jq`) is:
+
+```sh
+timestamp=$(date +%s)
+body='{"event_id":"evt_manual_001","event":"app_open","user_id":"u_manual","device_id":"d_manual","timestamp":"2026-09-28T14:22:05Z","properties":{"source":"curl"}}'
+signature=$(printf '%s' "$timestamp.$body" | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET" -hex | sed 's/^.* //')
+curl -i http://localhost:3000/webhooks/app \
+  -H 'content-type: application/json' \
+  -H "X-TPO-Timestamp: $timestamp" \
+  -H "X-TPO-Signature: sha256=$signature" \
+  --data-binary "$body"
+```
+
+Repeat the same command with the same body and timestamp while the signature is still fresh to get `200 {"status":"duplicate"}`. The authenticated `POST /api/demo/send-test-event` helper signs a generated event server-side and calls the same handler.
+
 ## Seeded data
 
 `npm run seed` loads 2,995 subscriber rows, 10,000 web events, and 930 app users. It merges 85 duplicate rows into 2,900 subscribers and quarantines 10 invalid/blank subscriber rows. The checked facts include 2,610 active readers, 464 cold readers, 8,441 linked web rows, 900 matched app users, and 139 active readers scoring at least 70. `npm test` includes the complete set of applicable PRD golden-number assertions and a repeat-seed check.

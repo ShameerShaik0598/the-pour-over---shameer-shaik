@@ -13,7 +13,8 @@
     "seed": "tsx scripts/seed.ts",
     "db:push": "tsx scripts/db-push.ts",
     "db:generate": "drizzle-kit generate",
-    "hash-password": "tsx scripts/hash-password.ts"
+    "hash-password": "tsx scripts/hash-password.ts",
+    "send-event": "tsx scripts/send-event.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.10",
