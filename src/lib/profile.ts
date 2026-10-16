@@ -1,5 +1,5 @@
 import { createHmac } from "node:crypto";
-import { desc, eq, ilike, inArray } from "drizzle-orm";
+import { asc, desc, eq, ilike, inArray } from "drizzle-orm";
 import type { AppDatabase } from "@/lib/db";
 import { appEvents, appUsers, deviceLinks, subscribers, visitors, webEvents, webhookDeliveries } from "@/lib/db/schema";
 import { normalizeEmail } from "@/lib/email";
@@ -9,6 +9,17 @@ import { getAppActivity } from "@/lib/webhook";
 
 export type ProfileHit = { type: "subscriber" | "app" | "visitor"; id: string; email: string | null; status: string | null; label: string };
 export type ProfileTimelineEntry = { kind: "web" | "app"; occurredAt: string; label: string; detail: string };
+
+export async function getRecruiterLookupExamples(database: AppDatabase) {
+  const rows = await database.select({ id: subscribers.id, email: subscribers.email, status: subscribers.status, source: subscribers.source })
+    .from(subscribers).orderBy(asc(subscribers.signupDate), asc(subscribers.id)).limit(5);
+  return rows.map((row) => ({ id: row.id, maskedEmail: maskEmail(row.email), status: row.status, source: row.source }));
+}
+
+export async function searchSubscriberById(database: AppDatabase, id: string): Promise<ProfileHit[]> {
+  const [subscriber] = await database.select().from(subscribers).where(eq(subscribers.id, id)).limit(1);
+  return subscriber ? [{ type: "subscriber", id: subscriber.id, email: subscriber.email, status: subscriber.status, label: "Newsletter reader · recruiter sample" }] : [];
+}
 
 export function opaqueAppProfileId(userId: string): string {
   return createHmac("sha256", profileTokenKey()).update(`app:${userId}`).digest("hex");

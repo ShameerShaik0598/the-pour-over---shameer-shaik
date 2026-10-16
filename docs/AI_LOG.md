@@ -92,6 +92,13 @@ What the AI did wrong or assumed: I returned a JSON success response from a rout
 How I noticed: Submitting the sign-out form posts directly to `/api/auth/logout`; the route clears the cookie but does not navigate afterward.
 Fix: Keep clearing the session cookie and return an HTTP 303 redirect to `/login` for the form submission.
 
+### 2026-10-16 — Consolidate sign-in and add masked recruiter lookup samples
+Tool: Codex
+What I asked for: Combine the separate login page with the landing sign-in section and provide five masked sample emails in Lookup.
+What the AI did wrong or assumed: I duplicated the credential form at `/login` even though the public landing page already contained recruiter credentials and sign-in.
+How I noticed: Navigating from “Back to Carafe” exposed a second login experience instead of returning directly to the existing landing sign-in section.
+Fix: Redirect `/login` to `/#login`; add five server-masked samples, search each by subscriber UUID, and keep the full email available only after opening its profile.
+
 - M2 local event sender initially used a named ESM import for `loadEnvConfig` from `@next/env`; Node resolved its CommonJS entry and the smoke command failed before sending. Switched to Node's `createRequire` to call the package's CommonJS export, then reran the sender against the local app.
 - M3 profile integration coverage initially assumed the first seeded app account also had web activity and an app event. The seed only guarantees an aggregate overlap, not which account appears first or that CSV users have webhook events, so the test now selects from the actual overlap and adds a test app event for that reader.
 - The M2 CLI smoke test created one `u_demo_test` row in the persistent local database, making a later seed summary show 931 app users. Removed the test event, device link, and profile created by that smoke test; reran `npm run seed` and restored the expected 930 app users. Keep future webhook smoke tests in isolated PGlite databases or clean their named local fixture afterward.

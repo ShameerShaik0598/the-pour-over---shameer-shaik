@@ -1,13 +1,14 @@
 import { createHmac } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { eq } from "drizzle-orm";
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import * as schema from "@/lib/db/schema";
 import type { AppDatabase } from "@/lib/db";
-import { appEvents, appUsers, deviceLinks, quarantine, visitors, webhookDeliveries } from "@/lib/db/schema";
+import { appEvents, appUsers, deviceLinks, quarantine, subscribers, visitors, webhookDeliveries } from "@/lib/db/schema";
 import { seedData } from "@/lib/ingest/seed";
-import { getProfile, opaqueAppProfileId, recentEvents, searchProfiles } from "@/lib/profile";
+import { getProfile, getRecruiterLookupExamples, opaqueAppProfileId, recentEvents, searchProfiles, searchSubscriberById } from "@/lib/profile";
 import { eraseProfile } from "@/lib/erase-profile";
 import { getOverviewData } from "@/lib/dashboard";
 import { processAppWebhook } from "@/lib/webhook";
@@ -53,6 +54,21 @@ describe("profile lookup and live activity", () => {
     expect(deviceHit[0]?.type).toBe("app");
     expect(emailHit[0]?.type).toBe("subscriber");
     expect(deviceHit[0]?.id).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it("offers five masked recruiter samples that can be searched and opened", async () => {
+    const examples = await getRecruiterLookupExamples(database);
+    expect(examples).toHaveLength(5);
+    for (const example of examples) {
+      expect(example.maskedEmail).toContain("•••");
+      const [stored] = await database.select().from(subscribers).where(eq(subscribers.id, example.id)).limit(1);
+      expect(example.maskedEmail).not.toBe(stored?.email);
+      const hit = (await searchSubscriberById(database, example.id))[0];
+      expect(hit).toMatchObject({ type: "subscriber", id: example.id });
+      const profile = await getProfile(database, "subscriber", example.id);
+      if (!profile || profile.type !== "subscriber") throw new Error("expected a full subscriber profile");
+      expect(profile.subscriber.email).toBe(stored?.email);
+    }
   });
 
   it("returns one profile with newsletter, site, app, timeline, and pre-signup journey", async () => {
