@@ -57,6 +57,13 @@ What the AI did wrong or assumed: It initially inferred row-level email capture 
 How I noticed: The new dashboard integration assertion showed 8,441 where the PRD requires 1,400.
 Fix: Added a non-PII `email_captured` flag to each web event, populated it during CSV ingestion, and query that flag for the card; all PRD card counts now pass from seeded data.
 
+### 2026-10-16 — Keep local PGlite outside the Next server bundle
+Tool: Codex
+What I asked for: Start the app and verify the new dashboard pages locally.
+What the AI did wrong or assumed: It assumed passing PGlite's unit/integration tests and production build guaranteed its file-backed WASM runtime would behave inside Next's development server bundle.
+How I noticed: Authenticated dashboard requests returned 500 with a filesystem `readFile` URL type error, while login and the tests passed.
+Fix: Marked `@electric-sql/pglite` as a server external package so Node loads its supported runtime directly.
+
 - M2 local event sender initially used a named ESM import for `loadEnvConfig` from `@next/env`; Node resolved its CommonJS entry and the smoke command failed before sending. Switched to Node's `createRequire` to call the package's CommonJS export, then reran the sender against the local app.
 - M3 profile integration coverage initially assumed the first seeded app account also had web activity and an app event. The seed only guarantees an aggregate overlap, not which account appears first or that CSV users have webhook events, so the test now selects from the actual overlap and adds a test app event for that reader.
 - The M2 CLI smoke test created one `u_demo_test` row in the persistent local database, making a later seed summary show 931 app users. Removed the test event, device link, and profile created by that smoke test; reran `npm run seed` and restored the expected 930 app users. Keep future webhook smoke tests in isolated PGlite databases or clean their named local fixture afterward.

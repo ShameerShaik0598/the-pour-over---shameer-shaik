@@ -159,7 +159,7 @@ export async function seedData(database: AppDatabase, rawDir = path.join(process
   }
   const eventValues = webResult.parsed.map((row) => ({ visitorId: row.visitorId, page: row.page, occurredAt: row.occurredAt, utmSource: row.utmSource, emailCaptured: row.email !== null, rowKey: `${row.visitorId}|${row.page}|${row.occurredAt.toISOString()}` }));
   for (let offset = 0; offset < eventValues.length; offset += 400) {
-    await database.insert(webEvents).values(eventValues.slice(offset, offset + 400)).onConflictDoNothing({ target: webEvents.rowKey });
+    await database.insert(webEvents).values(eventValues.slice(offset, offset + 400)).onConflictDoUpdate({ target: webEvents.rowKey, set: { emailCaptured: sql`excluded.email_captured` } });
   }
   await resolveAppUsers(database, appResult.valid.map((row) => ({ ...row, origin: "csv" as const })));
   return { input: { subscribers: subscriberCsv.length, webEvents: webCsv.length, appUsers: appCsv.length,
