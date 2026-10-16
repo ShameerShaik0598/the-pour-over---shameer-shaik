@@ -1,0 +1,34 @@
+import { describe, expect, it } from "vitest";
+import { TODAY, daysBetween } from "@/lib/clock";
+import { normalizeEmail } from "@/lib/email";
+import { normalizeSource } from "@/lib/sources";
+
+describe("email normalization", () => {
+  it("normalizes case, whitespace, and Unicode compatibility characters", () => {
+    expect(normalizeEmail("  Ａlice@Example.COM  ")).toBe("alice@example.com");
+  });
+  it("preserves plus tags and dots", () => {
+    expect(normalizeEmail("A.lice+news@gmail.com")).toBe("a.lice+news@gmail.com");
+  });
+  it("returns null for malformed addresses", () => {
+    expect(normalizeEmail("not-an-email")).toBeNull();
+    expect(normalizeEmail("@gmail.com")).toBeNull();
+    expect(normalizeEmail(null)).toBeNull();
+  });
+});
+
+describe("source mapping", () => {
+  it("maps canonical names case-insensitively and twitter to X", () => {
+    expect(normalizeSource("instagram")).toBe("Instagram");
+    expect(normalizeSource("twitter")).toBe("X");
+    expect(normalizeSource(" ")).toBeNull();
+    expect(normalizeSource("unknown")).toBeNull();
+  });
+});
+
+describe("product clock", () => {
+  it("uses the assessment date", () => {
+    expect(TODAY).toBe("2026-09-28");
+    expect(daysBetween("2026-08-29")).toBe(30);
+  });
+});
