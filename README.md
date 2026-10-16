@@ -47,6 +47,10 @@ Repeat the same command with the same body and timestamp while the signature is 
 
 Open `/app/lookup` to search by email fragment or exact `v_`, `u_`, and `d_` identifiers. Search terms go in a JSON request body. Email addresses are masked in results by default; the visible toggle reveals them for the current view. Subscriber profiles use the subscriber UUID, while app-only and visitor-only profile URLs use a keyed HMAC token derived with `SESSION_SECRET` so the original user/device/visitor identifier stays out of browser history. Profiles combine newsletter facts, site visits, app accounts, an activity timeline, identity explanations, and the pre-signup page path. `/app/live` polls every two seconds and links new events to their resolved profile. The demo event action uses the signed webhook handler.
 
+## Segments (M4)
+
+Open `/app/segments` to combine source, status, date, cold bucket, app, site activity, and engagement filters. The strict filter schema rejects unknown fields, and the compiler evaluates only allowlisted fields on the shared subscriber facts read model. Preview is debounced and paginated at 50 rows. Saved segments are shared with the team; viewers may save up to 10 each. CSV export includes the email Growth needs and prefixes spreadsheet formula cells with a single quote. A viewer export is capped at 5,000 rows.
+
 ## Seeded data
 
 `npm run seed` loads 2,995 subscriber rows, 10,000 web events, and 930 app users. It merges 85 duplicate rows into 2,900 subscribers and quarantines 10 invalid/blank subscriber rows. The checked facts include 2,610 active readers, 464 cold readers, 8,441 linked web rows, 900 matched app users, and 139 active readers scoring at least 70. `npm test` includes the complete set of applicable PRD golden-number assertions and a repeat-seed check.
