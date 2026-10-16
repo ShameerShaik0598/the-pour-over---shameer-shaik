@@ -1,5 +1,4 @@
 import { sql } from "drizzle-orm";
-import { db } from "@/lib/db";
 import type { AppDatabase } from "@/lib/db";
 import { rateLimits } from "@/lib/db/schema";
 
@@ -12,5 +11,5 @@ export async function allowRateLimit(database: AppDatabase, key: string, windowS
 }
 
 export function allowLoginAttempt(key: string, maximum = 10): Promise<boolean> {
-  return allowRateLimit(db, key, 600, maximum);
+  return import("@/lib/db").then(({ db }) => allowRateLimit(db, key, 600, maximum));
 }

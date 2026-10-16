@@ -61,6 +61,10 @@ To enable Gemini, set `GEMINI_API_KEY` and choose `GEMINI_MODEL` from Google's c
 
 `/app` loads reader, status, cold, source, visit-linking, quarantine, and recent-event figures from the database. The email-capture count is stored as a boolean on each `web_events` row; the email itself is not copied there. The cold-list card multiplies the query-backed lapsed and never-opened counts by an editable monthly assumption (default `$0.20`), not billing data. Its two actions save active-only lapsed and never-opened segments. `/app/data-quality` shows quarantine file/row/reason without displaying raw values, duplicate rows merged, unlinked visitors, and identity conflicts. Profile journey and link explanations are visible through Lookup.
 
+## Public landing page (M7)
+
+The public `/` page shows only aggregate figures from the seeded database, public recruiter demo credentials from environment variables, and a one-click viewer sign-in. The 3D streams are lazy-loaded, capped at a 1.5 pixel ratio, and stop rendering while off-screen; reduced-motion and no-WebGL browsers use a static SVG. Google Fonts are not fetched during build: the local editorial font names are followed by system fallbacks. `DEMO_USERNAME` and `DEMO_PASSWORD` are intentionally public and must be configured as low-privilege viewer credentials on any shared deployment. On the 2026-10-16 build, initial shared JS was 443,530 bytes raw (130,095 gzip); the lazy scene chunk was 918,492 raw (242,544 gzip). A Lighthouse run was unavailable because the CLI could not be fetched from npm in this environment.
+
 ## Seeded data
 
 `npm run seed` loads 2,995 subscriber rows, 10,000 web events, and 930 app users. It merges 85 duplicate rows into 2,900 subscribers and quarantines 10 invalid/blank subscriber rows. The checked facts include 2,610 active readers, 464 cold readers, 8,441 linked web rows, 900 matched app users, and 139 active readers scoring at least 70. `npm test` includes the complete set of applicable PRD golden-number assertions and a repeat-seed check.

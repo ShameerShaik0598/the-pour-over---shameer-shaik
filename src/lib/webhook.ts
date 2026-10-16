@@ -1,7 +1,7 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
-import { db, type AppDatabase } from "@/lib/db";
+import type { AppDatabase } from "@/lib/db";
 import { appEvents, appUsers, deviceLinks, identityConflicts, webhookDeliveries } from "@/lib/db/schema";
 import { linkDevice } from "@/lib/ingest/resolvers";
 import { allowRateLimit } from "@/lib/rate-limit";
@@ -65,7 +65,8 @@ function response(status: number, body: Record<string, string>) {
   return Response.json(body, { status });
 }
 
-export async function processAppWebhook(request: Request, database: AppDatabase = db): Promise<Response> {
+export async function processAppWebhook(request: Request, providedDatabase?: AppDatabase): Promise<Response> {
+  const database = providedDatabase ?? (await import("@/lib/db")).db;
   const contentLength = Number(request.headers.get("content-length"));
   if (Number.isFinite(contentLength) && contentLength > MAX_BYTES) {
     await delivery(database, "too_large"); return response(413, { error: "payload too large" });
@@ -141,7 +142,8 @@ export async function processAppWebhook(request: Request, database: AppDatabase 
   return response(202, { status: "accepted" });
 }
 
-export async function getAppActivity(profile: { userId?: string; deviceId?: string }, database: AppDatabase = db) {
+export async function getAppActivity(profile: { userId?: string; deviceId?: string }, providedDatabase?: AppDatabase) {
+  const database = providedDatabase ?? (await import("@/lib/db")).db;
   const effectiveUserId = sql<string | null>`coalesce(${appEvents.userId}, ${deviceLinks.userId})`;
   const conditions = [];
   if (profile.userId) conditions.push(sql`${effectiveUserId} = ${profile.userId}`);

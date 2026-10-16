@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { db } from "@/lib/db";
 import { eraseProfile } from "@/lib/erase-profile";
 import { hasSameOrigin } from "@/lib/same-origin";
 import { getProfile } from "@/lib/profile";
@@ -14,6 +13,7 @@ const paramsSchema = z.object({
 export async function GET(_request: Request, context: { params: Promise<{ type: string; id: string }> }) {
   const params = paramsSchema.safeParse(await context.params);
   if (!params.success) return NextResponse.json({ error: "profile not found" }, { status: 404 });
+  const { db } = await import("@/lib/db");
   const profile = await getProfile(db, params.data.type, params.data.id);
   return profile ? NextResponse.json(profile) : NextResponse.json({ error: "profile not found" }, { status: 404 });
 }
@@ -25,6 +25,7 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
   if (session.role !== "admin") return NextResponse.json({ error: "forbidden" }, { status: 403 });
   const params = paramsSchema.safeParse(await context.params);
   if (!params.success) return NextResponse.json({ error: "invalid profile" }, { status: 400 });
+  const { db } = await import("@/lib/db");
   const erased = await eraseProfile(db, params.data.type, params.data.id);
   if (!erased) return NextResponse.json({ error: "profile not found" }, { status: 404 });
   return NextResponse.json({ erased: true });

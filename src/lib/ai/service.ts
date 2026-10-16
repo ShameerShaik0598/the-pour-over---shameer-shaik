@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import { db, type AppDatabase } from "@/lib/db";
+import type { AppDatabase } from "@/lib/db";
 import { assistantAudit } from "@/lib/db/schema";
 import type { LlmClient } from "@/lib/ai/client";
 import { buildModelRequest } from "@/lib/ai/request";
@@ -29,7 +29,7 @@ export async function runAssistant(input: { message: unknown; sessionKey: string
   if (!parsed.success) throw new Error("message must be between 1 and 500 characters");
   const originalMessage = parsed.data;
   const redactedMessage = redactAssistantMessage(originalMessage);
-  const database = input.database ?? db;
+  const database = input.database ?? (await import("@/lib/db")).db;
   const cacheKey = SUGGESTED_PROMPTS.find((prompt) => prompt === originalMessage);
   let plan: AssistantPlan | null = null;
   let provider: AssistantRunResult["provider"] | null = null;

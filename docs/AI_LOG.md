@@ -64,6 +64,20 @@ What the AI did wrong or assumed: It assumed passing PGlite's unit/integration t
 How I noticed: Authenticated dashboard requests returned 500 with a filesystem `readFile` URL type error, while login and the tests passed.
 Fix: Marked `@electric-sql/pglite` as a server external package so Node loads its supported runtime directly.
 
+### 2026-10-16 — Constrain the hero illustration's mobile intrinsic width
+Tool: Codex
+What I asked for: Review the landing page at the specified 375, 768, and 1280 pixel widths.
+What the AI did wrong or assumed: The 440px max-width scene's grid wrapper kept its intrinsic width on mobile and introduced horizontal page overflow; the 768px layout also waited too long to become asymmetric.
+How I noticed: Browser viewport inspection showed a 456px document width at 375px and a stacked scene at 768px.
+Fix: Let the scene grid item shrink with `min-w-0`, switch the hero to two columns at the tablet breakpoint, and rechecked all three viewport widths without horizontal overflow.
+
+### 2026-10-16 — Avoid opening the persistent local database during injected test flows
+Tool: Codex
+What I asked for: Run all integration checks after adding the local 3D dependency and landing page.
+What the AI did wrong or assumed: Several modules eagerly initialized the file-backed PGlite singleton even when callers supplied isolated in-memory databases; concurrent initialization in Vitest caused WASM aborts before assertions ran.
+How I noticed: The affected suites passed when their modules lazily loaded the default database only for calls without an injected database.
+Fix: Made webhook, login rate-limit, assistant, and profile-route database fallbacks lazy; injected-database flows no longer open `.data/pglite` at import time.
+
 - M2 local event sender initially used a named ESM import for `loadEnvConfig` from `@next/env`; Node resolved its CommonJS entry and the smoke command failed before sending. Switched to Node's `createRequire` to call the package's CommonJS export, then reran the sender against the local app.
 - M3 profile integration coverage initially assumed the first seeded app account also had web activity and an app event. The seed only guarantees an aggregate overlap, not which account appears first or that CSV users have webhook events, so the test now selects from the actual overlap and adds a test app event for that reader.
 - The M2 CLI smoke test created one `u_demo_test` row in the persistent local database, making a later seed summary show 931 app users. Removed the test event, device link, and profile created by that smoke test; reran `npm run seed` and restored the expected 930 app users. Keep future webhook smoke tests in isolated PGlite databases or clean their named local fixture afterward.
