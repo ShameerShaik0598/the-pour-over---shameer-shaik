@@ -17,6 +17,8 @@ If local startup fails at `client.waitReady` with `RuntimeError: Aborted()`, sto
 
 Next.js App Router and strict TypeScript serve the UI and API routes. Drizzle ORM maps the application schema to Postgres, with PGlite locally and Neon as the free-tier production target. The seed pipeline normalizes and deduplicates source CSVs, quarantines invalid subscriber rows, and stitches web and app identities. Shared subscriber facts compute cold status and engagement for lookup, live activity, segments, and the plan-only assistant.
 
+For a detailed codebase walkthrough, data-storage explanation, CRUD/API map, test guide, reviewer Q&A, and Vercel/Netlify deployment steps, see [docs/BUILD_GUIDE.md](docs/BUILD_GUIDE.md).
+
 ## Data rules
 
 - Email normalization lives in `src/lib/email.ts`: Unicode NFKC, trim, lowercase, then validate. Plus tags and dots are preserved; internationalized text is compatibility-normalized, not converted into provider-specific aliases.
