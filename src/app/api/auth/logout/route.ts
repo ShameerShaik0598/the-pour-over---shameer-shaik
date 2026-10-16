@@ -4,7 +4,7 @@ import { sessionCookieName } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   if (!hasSameOrigin(request)) return NextResponse.json({ error: "invalid origin" }, { status: 403 });
-  const response = NextResponse.json({ ok: true });
+  const response = NextResponse.redirect(new URL("/login", request.url), 303);
   response.cookies.set(sessionCookieName, "", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 0 });
   return response;
 }
