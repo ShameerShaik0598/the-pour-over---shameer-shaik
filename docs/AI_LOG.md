@@ -121,3 +121,10 @@ Fix: Stopped the stuck dev server, preserved `.data/pglite` under a timestamped 
 - M5's first-page assistant query inherited the regular active-only default and returned 80 `/` visits instead of the PRD cohort's 87. Section 4's new-subscriber page counts include all statuses, so the assistant plan now preserves an omitted status and uses `any` for this aggregate only; explicitly requested status filters remain respected.
 - Profile privacy regression test initially invoked the hook-using React component as a plain function, causing an invalid hook call. Corrected it to render a React element through `react-dom/server` before rerunning tests.
 - Netlify hardening initially relied on the database-mode helper to narrow `process.env.DATABASE_URL`; TypeScript correctly noted that the helper's return value cannot narrow the separate environment expression. Added an explicit presence check in the Neon branch and kept the mode decision in the tested helper.
+
+### 2026-10-19 — Keep Netlify build workers off local PGlite
+Tool: Codex
+What I asked for: Diagnose and fix a Netlify production build that aborted while collecting configuration for database-backed API routes.
+What the AI did wrong or assumed: I first told the user a real `DATABASE_URL` was needed during the build. Reproducing the failure showed that the build only needed to avoid initializing local PGlite; the hosted URL is required by the deployed runtime, not by route collection itself.
+How I noticed: `npm run build` with no database URL failed during API route collection, while the code already correctly rejected a missing URL in production.
+Fix: Added a build wrapper that injects a loopback-only placeholder into the build child process when needed. The runtime database guard remains strict, and the deployment guide now distinguishes build-time configuration from runtime secrets.
