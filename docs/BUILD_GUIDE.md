@@ -71,7 +71,7 @@ The App Router files under `src/app/` correspond to browser paths:
 | `/login` | Redirects to `/#login`; it is a compatibility entry point, not a second login screen. |
 | `/app` | Authenticated overview: subscriber/cold/source counts, stitching impact, live activity, and cold-list cost estimate. |
 | `/app/lookup` | Search by email fragment or visitor/app/device ID; five server-masked recruiter sample emails; search results masked by default. |
-| `/app/lookup/{type}/{id}` | Full profile with newsletter facts, linked web/app activity, linking reasons, journey, and timeline. Full email is visible here to authenticated teammates. |
+| `/app/lookup/{type}/{id}` | Full profile with newsletter facts, linked web/app activity, linking reasons, journey, and timeline. Email is masked by default with an explicit reveal control. |
 | `/app/segments` | Filter builder, live preview, save, list saved segments, and export CSV. |
 | `/app/live` | Polls the recent event endpoint and links resolvable activity to profiles. |
 | `/app/assistant` | Suggested audience questions and validated answer/plan output. |
@@ -82,7 +82,7 @@ Most app pages use `AppNavigation`. The public landing scene is split between [`
 
 ### Lookup sample behavior
 
-The server loads five deterministic subscriber records and passes the browser only the subscriber UUID, masked email label, status, and source. The raw email is not included in those sample option props. Selecting an option sends its UUID in a JSON POST body to `/api/profiles/search`; it does not put an email in the address bar. The result is rendered masked by default. “Open full profile” navigates by UUID and the authorized profile page displays the full reader record. The existing “Reveal emails” control can reveal result-list emails for the current view.
+The server loads five deterministic subscriber records and passes the browser only the subscriber UUID, masked email label, status, and source. The raw email is not included in those sample option props. Selecting an option sends its UUID in a JSON POST body to `/api/profiles/search`; it does not put an email in the address bar. The result is rendered masked by default. “Open full profile” navigates by UUID and the authorized profile page keeps its email masked by default with an explicit reveal/mask control. The existing “Reveal emails” control can reveal result-list emails for the current view.
 
 ## Backend: request path and important code
 
@@ -274,14 +274,14 @@ Vercel’s Git flow normally creates a preview for non-production work and produ
 
 Netlify currently documents first-class Next.js support through its OpenNext adapter, including App Router, SSR, route handlers, and middleware/proxy deployment. It can import an existing Git repository and auto-deploy on pushes. [Netlify Next.js runtime](https://docs.netlify.com/build/frameworks/framework-setup-guides/nextjs/overview/) · [Netlify deploy from Git](https://docs.netlify.com/deploy/create-deploys/).
 
-1. Create Neon Postgres and save its pooled `DATABASE_URL` as above. Neon remains the external data store; Netlify is the app runtime/hosting provider.
+1. Create Neon Postgres and save its pooled `DATABASE_URL` as above. Neon remains the external data store; Netlify is the app runtime/hosting provider. A blank `DATABASE_URL` makes local Node development choose PGlite; it is not a valid hosted deployment configuration.
 2. In Netlify, **Add new project → Import an existing project**, authorize GitHub, and choose this repository. Set production branch to `main`. Allow Netlify to detect Next.js/OpenNext. Do not select static export: this app requires server rendering, route handlers, auth cookies, and a database.
-3. Add the same environment variables as for Vercel in Netlify Project configuration → Environment variables. Make `DATABASE_URL` and server secrets available to both build/runtime contexts as needed by the Next adapter. Ensure non-production preview deployments do not receive production write/admin secrets unless you explicitly need that.
+3. Add the environment variables in Netlify Project configuration → Environment variables. Netlify does not load the repository's `.env` or `.env.example` files. Make `DATABASE_URL` available to both Builds and Functions, with a non-empty Neon URL for each deploy context. Add `SESSION_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, `DEMO_USERNAME`, `DEMO_PASSWORD`, and `WEBHOOK_SECRET` for the branch context you will test. Ensure previews use their own database and low-privilege credentials rather than production write/admin secrets.
 4. Deploy; inspect the deploy log for Next.js/OpenNext adapter output. Connect the deployment to Neon with the configured URL. Do not point Netlify at local `.data/pglite`; serverless filesystem state is not the durable shared database.
 5. Run `npm run db:push` and `npm run seed` from a trusted shell against that Neon database. Check `/api/health`, login, lookup, profile, segment preview/export, assistant, webhook, and logout on the Netlify URL.
 6. Confirm cookies and redirect behavior on the Netlify domain, inspect serverless function logs for errors without adding request bodies/PII, and verify forwarding headers are trusted only from Netlify’s platform boundary.
 
-Because this project’s previous deployment verification focused on Vercel, treat Netlify as a supported-by-platform path that still needs a real Netlify preview smoke check. The official adapter documents support for the relevant Next features, but platform support does not replace this repository’s integration test on the deployed environment.
+Because this project’s previous deployment verification focused on Vercel, treat Netlify as a supported-by-platform path that still needs a real Netlify preview smoke check. The official adapter documents support for the relevant Next features, but platform support does not replace this repository’s integration test on the deployed environment. A missing database URL previously caused PGlite to initialize during route collection and fail with an Emscripten filesystem error; production now fails fast with a clear `DATABASE_URL` message instead.
 
 ### Comparing the redesign branch without changing production
 
