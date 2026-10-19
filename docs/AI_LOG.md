@@ -113,3 +113,10 @@ What I asked for: Diagnose and fix a Netlify production build that aborted while
 What the AI did wrong or assumed: I first told the user a real `DATABASE_URL` was needed during the build. Reproducing the failure showed that the build only needed to avoid initializing local PGlite; the hosted URL is required by the deployed runtime, not by route collection itself.
 How I noticed: `npm run build` with no database URL failed during API route collection, while the code already correctly rejected a missing URL in production.
 Fix: Added a build wrapper that injects a loopback-only placeholder into the build child process when needed. The runtime database guard remains strict, and the deployment guide now distinguishes build-time configuration from runtime secrets.
+
+### 2026-10-19 — Avoid querying recruiter samples during static generation
+Tool: Codex
+What I asked for: Backport the Netlify build fix to `main` after the production branch still failed during API route collection.
+What the AI did wrong or assumed: The build-only database URL stopped PGlite initialization for API routes but I did not check whether `main` statically rendered the lookup page, which queries subscriber data.
+How I noticed: Running the build on `main` passed route collection but failed prerendering `/app/lookup` with a database query against the build-only URL.
+Fix: Marked the database-backed lookup page as dynamic so its sample query runs at request time, alongside the existing runtime database requirement.
