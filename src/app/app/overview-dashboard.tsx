@@ -25,16 +25,16 @@ export function OverviewDashboard({ data, defaultCost }: { data: OverviewData; d
     } catch (error) { setNotice(error instanceof Error ? error.message : "Could not save this segment."); }
   }
 
-  return <div className="page-shell py-9">
+  return <div className="page-shell overview-page py-9">
     <p className="section-label">MONDAY, SEPTEMBER 28, 2026 · OVERVIEW</p>
     <div className="mt-2 flex flex-wrap items-end justify-between gap-4"><h2 className="font-display text-4xl sm:text-5xl">Good morning.</h2><Link href="/app/lookup" className="min-h-11 inline-flex items-center underline">Find a reader</Link></div>
     <p className="mt-3 max-w-2xl text-ink-muted">The whole reader relationship, from newsletter signup to the last page viewed.</p>
-    <div className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
+    <div className="dashboard-stats mt-10 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
       <StatFigure value={stats.subscriberRows.toLocaleString()} label="Readers"/><StatFigure value={stats.active.toLocaleString()} label="Active readers"/>
       <StatFigure value={stats.cold.total.toLocaleString()} label="Cold readers"/><StatFigure value={`${stats.web.linkedRows.toLocaleString()} / ${stats.web.rows.toLocaleString()}`} label="Linked visits"/>
     </div>
 
-    <div className="mt-12 grid gap-10 lg:grid-cols-2">
+    <div className="dashboard-columns mt-12 grid gap-10 lg:grid-cols-2">
       <section className="border-t border-line pt-5" aria-labelledby="stitching-title">
         <p className="section-label">STITCHING IMPACT</p><h3 id="stitching-title" className="mt-2 font-display text-2xl">More context, fewer blind spots.</h3>
         <div className="mt-6 grid grid-cols-2 gap-5"><StatFigure value={`${stats.web.rowsWithEmail.toLocaleString()} / ${stats.web.rows.toLocaleString()}`} label={`Email captured · ${emailPercent}%`}/><StatFigure value={`${stats.web.linkedRows.toLocaleString()} / ${stats.web.rows.toLocaleString()}`} label={`Stitched to a reader · ${stitchedPercent}%`}/></div>
@@ -53,7 +53,7 @@ export function OverviewDashboard({ data, defaultCost }: { data: OverviewData; d
       </section>
     </div>
 
-    <div className="mt-12 grid gap-10 lg:grid-cols-2">
+    <div className="dashboard-columns mt-12 grid gap-10 lg:grid-cols-2">
       <section className="border-t border-line pt-5"><p className="section-label">SOURCE MIX</p><h3 className="mt-2 font-display text-2xl">Where readers found us.</h3><ul className="mt-4 grid gap-3 sm:grid-cols-2">{Object.entries(stats.sourceCounts).map(([source, value]) => <li key={source} className="flex items-center justify-between border-b border-line pb-2"><SourceChip>{source}</SourceChip><span className="tabular-nums">{value.toLocaleString()}</span></li>)}</ul></section>
       <section className="border-t border-line pt-5"><div className="flex items-end justify-between gap-3"><div><p className="section-label">LIVE ACTIVITY</p><h3 className="mt-2 font-display text-2xl">App events arriving now.</h3></div><Link href="/app/live" className="min-h-11 inline-flex items-center underline">Open live feed</Link></div>
         {live.events.length ? <ul className="mt-4 divide-y divide-line">{live.events.slice(0, 6).map((event, index) => <li key={`${event.event}-${event.receivedAt}-${index}`} className="flex justify-between gap-4 py-3 text-sm"><span>{event.event.replaceAll("_", " ")}<span className="block text-ink-muted">{event.profile?.label ?? "Unlinked app activity"}</span></span><time className="text-xs text-ink-muted">{new Date(event.receivedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</time></li>)}</ul> : <p className="mt-4 text-sm text-ink-muted">No app activity received yet.</p>}

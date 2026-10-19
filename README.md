@@ -49,7 +49,7 @@ Repeat the same command with the same body and timestamp while the signature is 
 
 ## Lookup and live activity (M3)
 
-Open `/app/lookup` to search by email fragment or exact `v_`, `u_`, and `d_` identifiers. Search terms go in a JSON request body. Five deterministic recruiter samples are shown as masked addresses; selecting one searches by its subscriber UUID without sending its email to the browser. Search result emails remain masked by default, the visible toggle reveals them for the current view, and opening a full profile reveals its email. Subscriber profiles use the subscriber UUID, while app-only and visitor-only profile URLs use a keyed HMAC token derived with `SESSION_SECRET` so the original user/device/visitor identifier stays out of browser history. Profiles combine newsletter facts, site visits, app accounts, an activity timeline, identity explanations, and the pre-signup page path. `/app/live` polls every two seconds and links new events to their resolved profile. The demo event action uses the signed webhook handler.
+Open `/app/lookup` to search by email fragment or exact `v_`, `u_`, and `d_` identifiers. Search terms go in a JSON request body. Five deterministic recruiter samples are shown as masked addresses; selecting one searches by its subscriber UUID without sending its email to the browser. Search result emails remain masked by default, with an explicit reveal toggle for the current view. Full profile emails are also masked by default and have an explicit reveal/mask control; raw app user and device identifiers are not returned in profile data. Subscriber profiles use the subscriber UUID, while app-only and visitor-only profile URLs use a keyed HMAC token derived with `SESSION_SECRET` so the original user/device/visitor identifier stays out of browser history. Profiles combine newsletter facts, site visits, app accounts, an activity timeline, identity explanations, and the pre-signup page path. `/app/live` polls every two seconds and links new events to their resolved profile. The demo event action uses the signed webhook handler.
 
 ## Segments (M4)
 
@@ -92,6 +92,7 @@ API mutations enforce same-origin checks and authenticated sessions. Admin-only 
 - Web timestamps will be interpreted as UTC.
 - The editable cold-list cost is an estimate supplied by the operator, not billing data.
 - Event retention is intended to be 180 days; enforcement requires a future scheduled job.
+- The editorial UI uses system serif, sans, and monospace font stacks so builds do not depend on Google Fonts network access; these retain broadly available equivalents to the reference typography.
 
 ## Known limitations
 

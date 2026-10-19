@@ -99,9 +99,24 @@ What the AI did wrong or assumed: I duplicated the credential form at `/login` e
 How I noticed: Navigating from “Back to Carafe” exposed a second login experience instead of returning directly to the existing landing sign-in section.
 Fix: Redirect `/login` to `/#login`; add five server-masked samples, search each by subscriber UUID, and keep the full email available only after opening its profile.
 
+### 2026-10-19 — Make the redesign build without database or font network access
+Tool: Codex
+What I asked for: Redesign the shared Carafe shell and verify a production build.
+What the AI did wrong or assumed: I assumed a dummy `DATABASE_URL` was enough to make a static production build independent of the local database, and initially used `next/font/google` despite the build environment being unable to fetch fonts.
+How I noticed: Next prerendered `/app/lookup` and attempted a database query; the Google font fetch also failed. The active route must read seeded database facts, and builds in this environment cannot reach Google Fonts.
+Fix: Marked Lookup as force-dynamic, removed build-time remote font fetches, used the local system font stacks and documented the design assumption. The navigation pathname indicator was also made a client component after the production compiler reported the Server Component hook boundary.
+
+### 2026-10-19 — Recover profile navigation after a local PGlite abort
+Tool: Codex
+What I asked for: Fix recruiter lookup when opening a profile and improve the landing page illustration and metrics.
+What the AI first assumed: The `Open full profile` link itself was failing during Next.js client-side navigation.
+How I noticed: The route and seeded profile integration checks passed, but the local Next server log showed repeated PGlite `Aborted()` errors immediately before the RSC fetch failed for the profile route.
+Fix: Stopped the stuck dev server, preserved `.data/pglite` under a timestamped corrupt-store backup, recreated and seeded the local database, then smoke-checked the lookup page, sample search, and full profile over HTTP. Added a user-facing lookup fetch error state; the profile link itself did not need a route change.
+
 - M2 local event sender initially used a named ESM import for `loadEnvConfig` from `@next/env`; Node resolved its CommonJS entry and the smoke command failed before sending. Switched to Node's `createRequire` to call the package's CommonJS export, then reran the sender against the local app.
 - M3 profile integration coverage initially assumed the first seeded app account also had web activity and an app event. The seed only guarantees an aggregate overlap, not which account appears first or that CSV users have webhook events, so the test now selects from the actual overlap and adds a test app event for that reader.
 - The M2 CLI smoke test created one `u_demo_test` row in the persistent local database, making a later seed summary show 931 app users. Removed the test event, device link, and profile created by that smoke test; reran `npm run seed` and restored the expected 930 app users. Keep future webhook smoke tests in isolated PGlite databases or clean their named local fixture afterward.
 - M3's first final lint run stalled while ESLint traversed the generated local `.data` database directory. Added `.data/**` to ESLint's global ignores; the database is generated state and not source code.
 - M4's first segment compiler treated `has_web_activity` as a last-30-days condition, yielding 320 instead of the PRD's 431 overlap. The filter means any recorded site activity, so the compiler now checks all linked web history; `webVisitCount30` remains reserved for the score and 30-day metrics.
 - M5's first-page assistant query inherited the regular active-only default and returned 80 `/` visits instead of the PRD cohort's 87. Section 4's new-subscriber page counts include all statuses, so the assistant plan now preserves an omitted status and uses `any` for this aggregate only; explicitly requested status filters remain respected.
+- Profile privacy regression test initially invoked the hook-using React component as a plain function, causing an invalid hook call. Corrected it to render a React element through `react-dom/server` before rerunning tests.
