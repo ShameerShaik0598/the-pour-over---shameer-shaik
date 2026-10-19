@@ -5,12 +5,13 @@ import { drizzle as drizzleNeon } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
 import { PGlite } from "@electric-sql/pglite";
 import * as schema from "@/lib/db/schema";
+import { resolveDatabaseMode } from "@/lib/db/config";
 
 type Database = PgliteDatabase<typeof schema>;
 let closeClient: () => Promise<void> = async () => {};
 
 async function createDatabase(): Promise<Database> {
-  if (process.env.DATABASE_URL) {
+  if (resolveDatabaseMode(process.env.DATABASE_URL, process.env.NODE_ENV) === "neon" && process.env.DATABASE_URL) {
     // Both drivers expose the same PostgreSQL query builder; the PGlite type
     // keeps those builders stable across the local and Neon runtime branches.
     return drizzleNeon(neon(process.env.DATABASE_URL), { schema }) as unknown as Database;
