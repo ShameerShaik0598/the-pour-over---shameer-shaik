@@ -80,7 +80,7 @@ export async function getProfile(database: AppDatabase, type: "subscriber" | "ap
     if (!visitor) return null;
     const web = await database.select().from(webEvents).where(eq(webEvents.visitorId, visitor.visitorId)).orderBy(webEvents.occurredAt);
     return { type, visitor: { email: visitor.email, firstSeen: visitor.firstSeen.toISOString(), conflict: visitor.conflict },
-      devices: [], webCount: web.length, appAccounts: 0, whyLinked: [visitor.email ? "site email captured without a subscriber match" : "anonymous visitor identifier"], preSignupJourney: [],
+      webCount: web.length, appAccounts: 0, whyLinked: [visitor.email ? "site email captured without a subscriber match" : "anonymous visitor identifier"], preSignupJourney: [],
       timeline: web.map((event) => ({ kind: "web" as const, occurredAt: event.occurredAt.toISOString(), label: "Page viewed", detail: event.page })) };
   }
   if (type === "subscriber") {
@@ -106,16 +106,16 @@ export async function getProfile(database: AppDatabase, type: "subscriber" | "ap
     return { type, subscriber: { id: fact.id, email: fact.email, status: fact.status, source: fact.source, signupDate: fact.signupDate,
       lastOpenDate: fact.lastOpenDate, duplicateCount: fact.duplicateCount, cold: fact.cold, coldBucket: fact.coldBucket,
       coldStartDate: fact.coldStartDate, engagementScore: fact.engagementScore, webVisitCount30: fact.webVisitCount30,
-      hasApp: fact.hasApp, appEvents30: fact.appEvents30 }, visitors: linkedVisitors.map((row) => row.visitorId),
-      webCount: web.length, appAccounts: appAccounts.length, timeline, whyLinked, preSignupJourney: journey };
+      hasApp: fact.hasApp, appEvents30: fact.appEvents30 },
+      visitorCount: linkedVisitors.length, webCount: web.length, appAccounts: appAccounts.length, timeline, whyLinked, preSignupJourney: journey };
   }
   const users = await database.select().from(appUsers);
   const user = users.find((row) => opaqueAppProfileId(row.userId) === id);
   if (!user) return null;
   const activities = await getAppActivity({ userId: user.userId }, database);
   const linkedDevices = await database.select().from(deviceLinks).where(eq(deviceLinks.userId, user.userId));
-  return { type, appUser: { userId: user.userId, email: user.email, createdAt: user.createdAt.toISOString(), origin: user.origin },
-    devices: linkedDevices.map((row) => row.deviceId), webCount: 0, appAccounts: 1, whyLinked: ["app-only profile"], preSignupJourney: [],
+  return { type, appUser: { email: user.email, createdAt: user.createdAt.toISOString(), origin: user.origin },
+    deviceCount: linkedDevices.length, webCount: 0, appAccounts: 1, whyLinked: ["app-only profile"], preSignupJourney: [],
     timeline: activities.map((event) => ({ kind: "app" as const, occurredAt: event.occurredAt.toISOString(), label: event.event.replaceAll("_", " "), detail: "App activity" })) };
 }
 
