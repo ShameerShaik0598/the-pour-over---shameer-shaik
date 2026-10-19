@@ -16,10 +16,17 @@ export function LookupSearch({ examples }: { examples: RecruiterExample[] }) {
 
   async function searchRequest(payload: { query: string } | { sampleId: string }) {
     setBusy(true); setMessage("");
-    const response = await fetch("/api/profiles/search", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
-    const data = await response.json() as { results?: SearchHit[]; error?: string };
-    setResults(data.results ?? []); setMessage(response.ok ? (data.results?.length ? `${data.results.length} result${data.results.length === 1 ? "" : "s"}` : "No reader found.") : data.error ?? "Search failed.");
-    setBusy(false);
+    try {
+      const response = await fetch("/api/profiles/search", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+      const data = await response.json().catch(() => null) as { results?: SearchHit[]; error?: string } | null;
+      setResults(data?.results ?? []);
+      setMessage(response.ok ? (data?.results?.length ? `${data.results.length} result${data.results.length === 1 ? "" : "s"}` : "No reader found.") : data?.error ?? "Search failed. Please try again.");
+    } catch {
+      setResults([]);
+      setMessage("Could not reach the reader service. Check that Carafe is running, then try again.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function search(event: FormEvent<HTMLFormElement>) {
@@ -51,7 +58,7 @@ export function LookupSearch({ examples }: { examples: RecruiterExample[] }) {
     <ul className="mt-3 divide-y divide-line border-y border-line">
       {results.map((hit) => <li key={`${hit.type}-${hit.id}`} className="flex flex-col justify-between gap-2 py-4 sm:flex-row sm:items-center">
         <div><p className="font-medium">{showEmail && hit.email ? hit.email : maskEmail(hit.email)}</p><p className="mt-1 text-sm text-ink-muted">{hit.label}{hit.status ? ` · ${hit.status}` : ""}</p></div>
-        <Link className="min-h-10 inline-flex items-center" href={`/app/lookup/${hit.type}/${hit.id}`}>Open full profile <span aria-hidden="true" className="ml-2">→</span></Link>
+        <Link prefetch={false} className="min-h-10 inline-flex items-center" href={`/app/lookup/${hit.type}/${hit.id}`}>Open full profile <span aria-hidden="true" className="ml-2">→</span></Link>
       </li>)}
     </ul>
   </section>;

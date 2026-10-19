@@ -106,6 +106,27 @@ main > .page-shell > section, .profile-page > section { scroll-margin-top: 1rem;
 main .overflow-x-auto { scrollbar-color: #aaa39a var(--paper-2); }
 main :is(input[type="checkbox"], input[type="range"]) { accent-color: var(--accent-strong); }
 .masthead + .mast-nav + .page-shell .stat-figure { color: var(--ink); }
+.landing-hero { align-items: center; }
+.landing-intro > .section-label { max-width: 38rem; }
+.landing-auth { max-width: 34rem; }
+.landing-auth-actions button { min-width: 12rem; }
+.landing-login-card { padding: 1.25rem; border: 1px solid var(--line); background: var(--paper-2); }
+.landing-login-heading h2 { max-width: 28rem; line-height: 1.08; }
+.landing-credentials { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
+.landing-credential-row { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: .4rem; border: 1px solid var(--line); background: var(--paper); padding: .55rem .65rem; }
+.landing-credential-row code { display: block; max-width: 100%; overflow-wrap: anywhere; font-size: .75rem; }
+.landing-credential-row button { flex: 0 0 auto; }
+.landing-signin-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.landing-signin-form button { grid-column: 1 / -1; }
+.landing-scene-frame { width: min(100%, 470px); padding: 1rem; border: 1px solid var(--line); background: #f8f5f0; }
+.landing-scene-frame > .section-label { padding: .15rem .2rem; }
+.pour-scene { margin-inline: auto; }
+.landing-scene-caption { border-top: 1px solid var(--line); padding: .7rem .2rem 0; color: var(--ink-muted); font: italic 1rem Georgia, "Times New Roman", serif; }
+.landing-metrics { border-color: var(--line); }
+.landing-stats { align-items: stretch; }
+.landing-stats > li { display: grid; grid-template-rows: auto minmax(2.25rem, auto) 1fr; }
+.landing-stat-value { display: flex; min-height: 2.25rem; align-items: center; margin-top: .65rem; color: var(--ink); font-family: Consolas, "Liberation Mono", monospace; font-size: clamp(1rem, 1.55vw, 1.35rem); font-variant-numeric: lining-nums tabular-nums; font-feature-settings: "tnum" 1, "lnum" 1; letter-spacing: -.055em; line-height: 1.15; white-space: nowrap; }
+.stat-figure, .tabular-nums { font-variant-numeric: lining-nums tabular-nums; font-feature-settings: "tnum" 1, "lnum" 1; }
 @media (max-width: 720px) {
   .page-shell { width: min(100% - 2rem, 1320px); }
   .masthead-inner { align-items: flex-start; }
@@ -122,10 +143,18 @@ main :is(input[type="checkbox"], input[type="range"]) { accent-color: var(--acce
   .overview-page > .dashboard-stats > section { padding: 1rem .65rem; }
   .overview-page > .dashboard-stats > section:nth-child(2) { border-right: 0; }
   .segments-page aside { padding: 1rem; }
+  .landing-hero { min-height: 0; padding-block: 2rem; }
+  .landing-intro { max-width: none; }
+  .landing-illustration { order: -1; }
+  .landing-scene-frame { padding: .7rem; }
+  .landing-scene-frame .pour-scene { max-width: 360px; }
 }
 @media (max-width: 420px) {
   .masthead-inner { gap: .5rem; }
   .masthead-meta { max-width: 47%; font-size: .55rem; }
   .mast-nav-link { min-height: 42px; padding-inline: .55rem; font-size: .58rem; }
+  .landing-credentials, .landing-signin-form { grid-template-columns: 1fr; }
+  .landing-signin-form button { grid-column: auto; }
+  .landing-login-card { padding: 1rem; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
