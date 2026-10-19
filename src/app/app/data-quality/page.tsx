@@ -10,7 +10,7 @@ export default async function DataQualityPage() {
   const session = await readSession((await cookies()).get(sessionCookieName)?.value);
   if (!session) redirect("/login");
   const { dataQuality } = await getOverviewData(db);
-  return <main id="main"><Masthead title="Data quality" /><AppNavigation /><div className="page-shell py-9">
+  return <main id="main"><Masthead title="Data quality" /><AppNavigation /><div className="page-shell quality-page py-9">
     <p className="section-label">OPERATIONS · DATA QUALITY</p><h2 className="mt-2 font-display text-4xl">Clean inputs. Clear decisions.</h2>
     <div className="mt-8 grid grid-cols-2 gap-5 md:grid-cols-4">{[[dataQuality.quarantined.length, "Quarantined rows"], [dataQuality.duplicatesMerged, "Duplicate rows merged"], [dataQuality.unlinkedVisitors, "Unlinked visitors"], [dataQuality.identityConflicts, "Identity conflicts"]].map(([value, label]) => <section key={label} className="border-t border-line pt-4"><p className="stat-figure">{Number(value).toLocaleString()}</p><p className="mt-2 text-sm text-ink-muted">{label}</p></section>)}</div>
     <section className="mt-12 border-t border-line pt-5"><p className="section-label">QUARANTINE</p><h3 className="mt-2 font-display text-2xl">Rows excluded during ingestion.</h3>

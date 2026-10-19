@@ -11,7 +11,7 @@ export function ProfileView({ profile }: { profile: Profile }) {
   const [source, setSource] = useState<"all" | "web" | "app">("all");
   const timeline = useMemo(() => profile.timeline.filter((entry) => source === "all" || entry.kind === source), [profile.timeline, source]);
   const reader = profile.subscriber;
-  return <div className="page-shell py-9">
+  return <div className="page-shell profile-page py-9">
     <Link href="/app/lookup" className="text-sm">← Back to lookup</Link>
     <p className="section-label mt-7">{reader ? "NEWSLETTER READER" : profile.visitor ? "UNLINKED SITE VISITOR" : "APP-ONLY PROFILE"}</p>
     <h2 className="mt-2 break-words font-display text-4xl">{reader?.email ?? profile.visitor?.email ?? profile.appUser?.email ?? "App-only reader"}</h2>

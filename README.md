@@ -92,6 +92,7 @@ API mutations enforce same-origin checks and authenticated sessions. Admin-only 
 - Web timestamps will be interpreted as UTC.
 - The editable cold-list cost is an estimate supplied by the operator, not billing data.
 - Event retention is intended to be 180 days; enforcement requires a future scheduled job.
+- The editorial UI uses system serif, sans, and monospace font stacks so builds do not depend on Google Fonts network access; these retain broadly available equivalents to the reference typography.
 
 ## Known limitations
 
