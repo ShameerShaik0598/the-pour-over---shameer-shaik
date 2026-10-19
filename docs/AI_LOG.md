@@ -135,3 +135,10 @@ What the AI did wrong or assumed: The build-only database URL stopped PGlite ini
 How I noticed: Running the build on `main` passed route collection but failed prerendering `/app/lookup` with a database query against the build-only URL.
 Fix: Marked the database-backed lookup page as dynamic so its sample query runs at request time, alongside the existing runtime database requirement.
 - Profile privacy regression test initially invoked the hook-using React component as a plain function, causing an invalid hook call. Corrected it to render a React element through `react-dom/server` before rerunning tests.
+
+### 2026-10-19 — Verify production database variables reach migration commands
+Tool: Codex
+What I asked for: Initialize the newly connected Neon database from the local project.
+What the AI did wrong or assumed: I assumed `vercel env run -e production` would make the sensitive `DATABASE_URL` available to the child process. Vercel reported that a secret could not be pulled; the first migration command therefore selected the local PGlite fallback instead of Neon.
+How I noticed: Checked only the boolean presence of `DATABASE_URL` in the command environment; it was false. The Neon database has not been migrated or seeded by that command.
+Fix: Added `DATABASE_URL` to the gitignored `.env.local`, verified the CLI child process could see it without printing it, then ran the migration and seed successfully against Neon. No Neon write was attempted until the presence check passed.
