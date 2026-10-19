@@ -4,7 +4,6 @@ import { PourScene } from "@/components/pour-scene";
 import { Masthead } from "@/components/ui";
 import { db } from "@/lib/db";
 import { getOverviewData } from "@/lib/dashboard";
-import { TODAY_LABEL } from "@/lib/clock";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +21,7 @@ export default async function LandingPage() {
   return <main id="main">
     <Masthead title="Carafe" eyebrow="THE POUR OVER · READER EDITION" />
     <section className="landing-hero page-shell grid min-h-[min(760px,calc(100svh-84px))] items-center gap-6 py-10 md:grid-cols-[1.1fr_.9fr] lg:gap-10 lg:py-14">
-      <div className="landing-intro max-w-xl"><p className="section-label">{TODAY_LABEL.toUpperCase()} · A QUIETER WAY TO KNOW YOUR READERS</p><h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl lg:text-7xl">Every reader,<br/><span className="text-accent-strong">one cup.</span></h2><p className="mt-5 max-w-lg text-lg leading-relaxed text-ink-muted">Newsletter, website, and app activity—brought together into one thoughtful view of the people who read The Pour Over.</p>
+      <div className="landing-intro max-w-xl"><p className="section-label">A QUIETER WAY TO KNOW YOUR READERS</p><h2 className="mt-5 font-display text-5xl leading-[1.02] sm:text-6xl lg:text-7xl">Every reader,<br/><span className="text-accent-strong">one cup.</span></h2><p className="mt-5 max-w-lg text-lg leading-relaxed text-ink-muted">Newsletter, website, and app activity—brought together into one thoughtful view of the people who read The Pour Over.</p>
         <LandingAuth username={process.env.DEMO_USERNAME ?? ""} password={process.env.DEMO_PASSWORD ?? ""} />
       </div>
       <div className="landing-illustration flex min-w-0 justify-center lg:justify-end"><div className="landing-scene-frame"><p className="section-label">A SMALL PAUSE BEFORE THE EDITION</p><PourScene /><p className="landing-scene-caption">Good morning from the reader desk.</p></div></div>

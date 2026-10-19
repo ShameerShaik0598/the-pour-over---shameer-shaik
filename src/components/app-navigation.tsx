@@ -13,6 +13,6 @@ export function AppNavigation() {
       const active = href === "/app" ? pathname === href || pathname === "/app/" : pathname === href || pathname.startsWith(`${href}/`);
       return <Link key={href} href={href} aria-current={active ? "page" : undefined} className={`mast-nav-link${active ? " is-active" : ""}`}>{label}</Link>;
     })}</div>
-    <div className="mast-nav-actions"><span className="mast-nav-note">DISPATCH DESK · MORNING CYCLE</span><form action="/api/auth/logout" method="post"><button className="mast-signout">Sign out</button></form></div>
+    <div className="mast-nav-actions"><form action="/api/auth/logout" method="post"><button className="mast-signout">Sign out</button></form></div>
   </div></nav>;
 }
