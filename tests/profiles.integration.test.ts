@@ -12,6 +12,9 @@ import { getProfile, getRecruiterLookupExamples, opaqueAppProfileId, recentEvent
 import { eraseProfile } from "@/lib/erase-profile";
 import { getOverviewData } from "@/lib/dashboard";
 import { processAppWebhook } from "@/lib/webhook";
+import { ProfileView } from "@/app/app/lookup/[type]/[id]/profile-view";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 
 let client: PGlite;
 let database: AppDatabase;
@@ -68,6 +71,10 @@ describe("profile lookup and live activity", () => {
       const profile = await getProfile(database, "subscriber", example.id);
       if (!profile || profile.type !== "subscriber") throw new Error("expected a full subscriber profile");
       expect(profile.subscriber.email).toBe(stored?.email);
+      const markup = renderToStaticMarkup(createElement(ProfileView, { profile }));
+      expect(markup).toContain("Reveal email");
+      expect(markup).toContain(example.maskedEmail);
+      expect(markup).not.toContain(stored?.email ?? "");
     }
   });
 

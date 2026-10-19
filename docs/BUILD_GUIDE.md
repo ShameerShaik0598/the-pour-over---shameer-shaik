@@ -283,6 +283,10 @@ Netlify currently documents first-class Next.js support through its OpenNext ada
 
 Because this project’s previous deployment verification focused on Vercel, treat Netlify as a supported-by-platform path that still needs a real Netlify preview smoke check. The official adapter documents support for the relevant Next features, but platform support does not replace this repository’s integration test on the deployed environment. Missing database configuration previously started PGlite during route collection and failed with an Emscripten filesystem error; the build script now uses a build-only placeholder, while production requests still require a real `DATABASE_URL`.
 
+### Comparing the redesign branch without changing production
+
+Keep `main` selected as Netlify’s production branch. After the `redesign` branch is pushed, add `redesign` under Deploy contexts / branch deploys (or the equivalent current Netlify UI) and enable branch deploys for that branch. Netlify will create a separate branch URL for comparison; do not change the production branch to `redesign`, and do not give its preview production write credentials. Set up its own Neon database and preview-only secrets before testing any write flows. This repository does not create a Netlify site, change provider settings, or deploy automatically from this guide.
+
 ## Environment variable reference
 
 | Name | Required? | Purpose / safe handling |

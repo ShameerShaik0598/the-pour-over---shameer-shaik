@@ -1,11 +1,18 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const links = [["Overview", "/app"], ["Lookup", "/app/lookup"], ["Segments", "/app/segments"], ["Live", "/app/live"], ["Ask", "/app/assistant"]] as const;
 
 export function AppNavigation() {
-  return <nav aria-label="Main navigation" className="page-shell flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line py-3 text-sm">
-    {links.map(([label, href]) => <Link key={href} href={href} className="min-h-10 inline-flex items-center">{label}</Link>)}
-    <Link href="/app/data-quality" className="min-h-10 inline-flex items-center">Data quality</Link>
-    <form action="/api/auth/logout" method="post" className="ml-auto"><button className="min-h-10 underline">Sign out</button></form>
-  </nav>;
+  const pathname = usePathname();
+  const items = [...links, ["Data quality", "/app/data-quality"] as const];
+  return <nav aria-label="Main navigation" className="mast-nav"><div className="page-shell mast-nav-inner">
+    <div className="mast-nav-links">{items.map(([label, href]) => {
+      const active = href === "/app" ? pathname === href || pathname === "/app/" : pathname === href || pathname.startsWith(`${href}/`);
+      return <Link key={href} href={href} aria-current={active ? "page" : undefined} className={`mast-nav-link${active ? " is-active" : ""}`}>{label}</Link>;
+    })}</div>
+    <div className="mast-nav-actions"><span className="mast-nav-note">DISPATCH DESK · MORNING CYCLE</span><form action="/api/auth/logout" method="post"><button className="mast-signout">Sign out</button></form></div>
+  </div></nav>;
 }
